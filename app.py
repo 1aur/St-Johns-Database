@@ -14,7 +14,7 @@ db_config = {
     'user': os.getenv('DB_USER'),      
     'password': os.getenv('DB_PASSWORD'),  
     'database': os.getenv('DB_DATABASE'),
-    'port': int(os.getenv('DB_PORT', 36109))
+    'port': os.getenv('DB_PORT', '36109')  # Keeps it as a string
 }
 
 @app.before_request
