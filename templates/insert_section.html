@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="static/STJohnsLogo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insert New Section</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 150px; 
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #800000; 
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            width: 100%;
+            text-align: left; 
+        }
+
+        input {
+            display: block;
+            width: 90%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box; 
+        }
+
+        button {
+            background-color: #cf102d; 
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            border-radius: 5px; 
+        }
+
+        button:hover {
+            background-color: #a50920; 
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="http://127.0.0.1:5000/">
+            <img src="static/st-johns-university.png" alt="St. John's University Logo">
+        </a>
+    </div>
+    
+    <h1>Insert New Section</h1>
+    
+    <div class="form-container">
+        <form action="/insert_section" method="POST">
+            <label for="section_id">Section ID:</label>
+            <input type="text" id="section_id" name="section_id" required>
+
+            <label for="year">Year:</label>
+            <input type="text" id="year" name="year" required>
+
+            <label for="room_location">Room Location:</label>
+            <input type="text" id="room_location" name="room_location" required>
+
+            <label for="instructor_id">Instructor ID:</label>
+            <input type="text" id="instructor_id" name="instructor_id" required>
+
+            <label for="course_id">Course ID:</label>
+            <input type="text" id="course_id" name="course_id" required>
+
+            <label for="semester">Semester:</label>
+            <input type="text" id="semester" name="semester" required>
+
+            <button type="submit">Add Section</button>
+        </form>
+    </div>
+</body>
+</html>

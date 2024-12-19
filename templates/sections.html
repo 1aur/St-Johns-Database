@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="static/STJohnsLogo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section Information</title>
+    
+    <script>
+        function searchSections() {
+            const query = document.getElementById('search-input').value.trim();
+
+            if (!query) {
+                document.getElementById('autocomplete-list').innerHTML = '';
+                return;
+            }
+
+            fetch(`/search_sections?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('autocomplete-list');
+                    dropdown.innerHTML = ''; 
+
+                    data.sections.forEach(section => {
+                        const option = document.createElement('div');
+                        option.innerText = `${section.section_id}`; 
+                        option.className = 'dropdown-item';
+                        option.onclick = () => {
+                            document.getElementById('search-input').value = `${section.section_id}`;
+                            fetchSectionData(section.section_id);
+                            dropdown.innerHTML = ''; 
+                        };
+                        dropdown.appendChild(option);
+                    });
+                });
+        }
+
+        function fetchSectionData(section_id) {
+            fetch(`/get_section_data?section_id=${section_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    const table = document.getElementById('section-data-table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>Section ID</th>
+                            <td>${data.section_id}</td>
+                        </tr>
+                        <tr>
+                            <th>Year</th>
+                            <td>${data.year}</td>
+                        </tr>
+                        <tr>
+                            <th>Room Location</th>
+                            <td>${data.room_location}</td>
+                        </tr>
+                        <tr>
+                            <th>Instructor ID</th>
+                            <td>${data.instructor_id}</td>
+                        </tr>
+                        <tr>
+                            <th>Course ID</th>
+                            <td>${data.course_id}</td>
+                        </tr>
+                        <tr>
+                            <th>Semester</th>
+                            <td>${data.semester}</td>
+                        </tr>
+                    `;
+                });
+        }
+
+        function resetSearch() {
+            document.getElementById('search-input').value = ''; 
+            document.getElementById('autocomplete-list').innerHTML = ''; 
+            document.getElementById('section-data-table').innerHTML = ''; 
+        }
+
+        function openDeleteForm() {
+            const section_id = prompt("Enter the Section ID of the section you want to delete:");
+            if (section_id) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/delete_section';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'section_id';
+                input.value = section_id;
+
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function openUpdateForm() {
+            const section_id = prompt("Enter the Section ID of the section you want to update:");
+            if (section_id) {
+                window.location.href = `/update_section?section_id=${section_id}`;
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px; 
+        }
+
+        .buttons a {
+            text-decoration: none;
+        }
+
+        .buttons button {
+            background-color: #cf102d; 
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .buttons button:hover {
+            background-color: #a50920; 
+        }
+
+        .search-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            width: 350px; 
+        }
+
+        .search-container input {
+            padding: 10px;
+            border: 2px solid #cf102d;
+            border-right: none; 
+            border-radius: 5px 0 0 5px;
+            width: calc(100% - 80px); 
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .search-container input::placeholder {
+            color: #999;
+            font-style: normal; 
+        }
+
+        .search-container button {
+            background-color: #cf102d;
+            color: white;
+            padding: 10px;
+            border: 2px solid #cf102d; 
+            border-left: none; 
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 16px;
+            width: 80px;
+            box-sizing: border-box;
+        }
+
+        .search-container button:hover {
+            background-color: #a50920;
+        }
+
+        .autocomplete-dropdown {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background-color: white;
+            width: 100%;
+            z-index: 1000;
+            top: 100%; 
+            left: 0; 
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+        }
+
+        .autocomplete-dropdown div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-dropdown div:hover {
+            background-color: #f0f0f0;
+        }
+
+        #section-data {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #cf102d; 
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/">
+            <img src="static/st-johns-university.png" alt="St. John's University Logo" style="width: 150px; margin-bottom: 20px;">
+        </a>
+        <h1>Section Information</h1>
+    
+        <div class="buttons">
+            <a href="/insert_section"><button>Insert</button></a>
+            <button onclick="openUpdateForm()">Update</button>
+            <button onclick="openDeleteForm()">Delete</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="search-input" oninput="searchSections()" placeholder="Search for Section ID...">
+            <button onclick="resetSearch()">Reset</button>
+            <div id="autocomplete-list" class="autocomplete-dropdown"></div>
+        </div>
+
+        <div id="section-data">
+            <table id="section-data-table"></table>
+        </div>
+    </div>
+</body>
+</html>

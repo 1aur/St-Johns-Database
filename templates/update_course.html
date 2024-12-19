@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="static/STJohnsLogo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Course</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 150px; 
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #800000;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            text-align: center; 
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            width: 100%;
+            text-align: left; 
+        }
+
+        input, textarea {
+            display: block;
+            width: 90%; 
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical; 
+        }
+
+        button {
+            background-color: #cf102d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #a50920; 
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="http://127.0.0.1:5000/">
+            <img src="static/st-johns-university.png" alt="St. John's University Logo">
+        </a>
+    </div>
+    
+    <h1>Update Course</h1>
+    
+    <div class="form-container">
+        <form action="/update_course" method="POST">
+            <input type="hidden" name="id" value="{{ course[0] }}">  <!-- Course ID -->
+
+            <label for="course_name">Course Name:</label>
+            <input type="text" id="course_name" name="course_name" value="{{ course[1] }}" required>
+
+            <label for="credit">Credits:</label>
+            <input type="number" id="credit" name="credit" value="{{ course[2] }}" required>
+
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" name="subject" value="{{ course[3] }}" required>
+
+            <label for="campus">Campus:</label>
+            <input type="text" id="campus" name="campus" value="{{ course[4] }}" required>
+
+            <label for="course_description">Description:</label>
+            <textarea id="course_description" name="course_description" required>{{ course[6] }}</textarea>
+
+            <label for="prerequisites">Prerequisites:</label>
+            <input type="text" id="prerequisites" name="prerequisites" value="{{ course[7] }}" required>
+
+            <label for="max_capacity">Max Capacity:</label>
+            <input type="number" id="max_capacity" name="max_capacity" value="{{ course[8] }}" required>
+
+            <label for="department">Department:</label>
+            <input type="text" id="department" name="department" value="{{ course[9] }}" required>
+
+            <button type="submit">Update Course</button>
+        </form>
+    </div>
+</body>
+</html>

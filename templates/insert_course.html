@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="static/STJohnsLogo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insert New Course</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 150px; 
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #800000; 
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            text-align: center; 
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            width: 100%;
+            text-align: left; 
+        }
+
+        input, textarea {
+            display: block;
+            width: 90%; 
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical; 
+        }
+
+        button {
+            background-color: #cf102d; 
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #a50920; 
+        }
+    </style>
+    <script>
+        function confirmSubmission() {
+            return confirm("Are you sure you want to add this course?");
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="http://127.0.0.1:5000/">
+            <img src="static/st-johns-university.png" alt="St. John's University Logo">
+        </a>
+    </div>
+    
+    <h1>Insert New Course</h1>
+    
+    <div class="form-container">
+        <form action="/insert_course" method="POST" onsubmit="return confirmSubmission();">
+            <label for="course_id">Course ID:</label>
+            <input type="text" id="course_id" name="course_id" required>
+
+            <label for="course_name">Course Name:</label>
+            <input type="text" id="course_name" name="course_name" required>
+
+            <label for="credit">Credits:</label>
+            <input type="number" id="credit" name="credit" required>
+
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" name="subject" required>
+
+            <label for="campus">Campus:</label>
+            <input type="text" id="campus" name="campus" required>
+
+            <label for="college">College:</label>
+            <input type="text" id="college" name="college" required>
+
+            <label for="course_description">Description:</label>
+            <textarea id="course_description" name="course_description" required></textarea>
+
+            <label for="prerequisites">Prerequisites:</label>
+            <input type="text" id="prerequisites" name="prerequisites" required>
+
+            <label for="max_capacity">Max Capacity:</label>
+            <input type="number" id="max_capacity" name="max_capacity" required>
+
+            <label for="department">Department:</label>
+            <input type="text" id="department" name="department" required>
+
+            <button type="submit">Add Course</button>
+        </form>
+    </div>
+</body>
+</html>

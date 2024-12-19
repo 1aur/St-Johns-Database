@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="static/STJohnsLogo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>St. John's University Database</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff; /* White background for a clean look */
+            color: #333;
+            text-align: center;
+        }
+
+
+        .logo {
+            margin-top: 30px;
+        }
+
+        .logo img {
+            width: 250px; /* Set logo size */
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .logo img:hover {
+            transform: scale(1.05); /* Slight zoom effect for interactivity */
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .box {
+            width: 250px;
+            height: 250px;
+            background-color: #C8102E; /* St. John's Red */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .box p {
+            margin: 0;
+        }
+
+        footer {
+            margin-top: 50px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .box {
+                width: 220px;
+                height: 220px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo">
+        <img src="{{ url_for('static', filename='st-johns-university.png') }}" alt="St. John's University Logo">
+    </div>
+
+    <div class="container">
+        <div class="box" onclick="location.href='/students';">
+            <p>Student Information</p>
+        </div>
+        <div class="box" onclick="location.href='/instructors';">
+            <p>Instructor Information</p>
+        </div>
+        <div class="box" onclick="location.href='/courses';">
+            <p>Course Information</p>
+        </div>
+        <div class="box" onclick="location.href='/sections';">
+            <p>Section Information</p>
+        </div>
+        <div class="box" onclick="location.href='/enrollments';">
+            <p>Enrollment Information</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 St. John's University Database Management</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="static/STJohnsLogo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insert New Enrollment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 150px;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #cf102d;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            width: 100%;
+            text-align: left;
+        }
+
+        input {
+            display: block;
+            width: 90%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #cf102d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #a50920;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="http://127.0.0.1:5000/">
+            <img src="static/st-johns-university.png" alt="St. John's University Logo">
+        </a>
+    </div>
+    
+    <h1>Insert New Enrollment</h1>
+    
+    <div class="form-container">
+        <form action="/insert_enrollment" method="POST">
+            <label for="section_id">Section ID:</label>
+            <input type="text" id="section_id" name="section_id" required>
+
+            <label for="enrollment_date">Enrollment Date:</label>
+            <input type="date" id="enrollment_date" name="enrollment_date" required>
+
+            <label for="grade">Grade:</label>
+            <input type="text" id="grade" name="grade">
+
+            <label for="enrollment_status">Enrollment Status:</label>
+            <input type="text" id="enrollment_status" name="enrollment_status" required>
+
+            <label for="stormcard_id">Stormcard ID:</label>
+            <input type="text" id="stormcard_id" name="stormcard_id" required>
+
+            <button type="submit">Add Enrollment</button>
+        </form>
+    </div>
+</body>
+</html>

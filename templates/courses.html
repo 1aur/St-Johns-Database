@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="static/STJohnsLogo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Information</title>
+
+    <script>
+        function searchCourses() {
+            const query = document.getElementById('search-input').value.trim();
+
+            if (!query) {
+                document.getElementById('autocomplete-list').innerHTML = '';
+                return;
+            }
+
+            fetch(`/search_courses?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('autocomplete-list');
+                    dropdown.innerHTML = ''; 
+                    data.courses.forEach(course => {
+                        const option = document.createElement('div');
+                        option.innerText = `${course.course_name}`;
+                        option.className = 'dropdown-item';
+                        option.onclick = () => {
+                            document.getElementById('search-input').value = `${course.course_name}`;
+                            fetchCourseData(course.id);
+                            dropdown.innerHTML = ''; // Clear dropdown
+                        };
+                        dropdown.appendChild(option);
+                    });
+                });
+        }
+
+        function fetchCourseData(courseId) {
+            fetch(`/get_course_data?id=${courseId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    const table = document.getElementById('course-data-table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>Course ID</th>
+                            <td>${data.id}</td>
+                        </tr>
+                        <tr>
+                            <th>Course Name</th>
+                            <td>${data.name}</td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td>${data.description}</td>
+                        </tr>
+                        <tr>
+                            <th>Credits</th>
+                            <td>${data.credit}</td>
+                        </tr>
+                        <tr>
+                            <th>Subject</th>
+                            <td>${data.subject}</td>
+                        </tr>
+                        <tr>
+                            <th>Campus</th>
+                            <td>${data.campus}</td>
+                        </tr>
+                        <tr>
+                            <th>Prerequisites</th>
+                            <td>${data.prerequisites ? data.prerequisites : 'None'}</td>
+                        </tr>
+                        <tr>
+                            <th>Max Capacity</th>
+                            <td>${data['max_capacity']}</td>
+                        </tr>
+                        <tr>
+                            <th>Department</th>
+                            <td>${data.department}</td>
+                        </tr>
+                        <tr>
+                            <th>College</th>
+                            <td>${data.college}</td>
+                        </tr>
+                    `;
+                });
+        }
+
+        function resetSearch() {
+            document.getElementById('search-input').value = ''; 
+            document.getElementById('autocomplete-list').innerHTML = ''; 
+            document.getElementById('course-data-table').innerHTML = ''; 
+        }
+
+        function openUpdateForm() {
+            const courseId = prompt("Enter the ID of the course you want to update:");
+            if (courseId) {
+                window.location.href = `/update_course?id=${courseId}`;
+            }
+        }
+
+        function openDeleteForm() {
+            const courseId = prompt("Enter the ID of the course you want to delete:");
+            if (courseId) {
+                const confirmed = confirm(`Are you sure you want to delete the course with ID: ${courseId}?`);
+                if (confirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/delete_course';
+
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'id';
+                    input.value = courseId;
+
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .buttons a {
+            text-decoration: none;
+        }
+
+        .buttons button {
+            background-color: #cf102d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .buttons button:hover {
+            background-color: #a50920; 
+        }
+
+        .search-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            width: 350px; 
+        }
+
+        .search-container input {
+            padding: 10px;
+            border: 2px solid #cf102d; 
+            border-right: none;
+            border-radius: 5px 0 0 5px;
+            width: calc(100% - 80px); 
+            font-size: 16px;
+            display: inline-block;
+            box-sizing: border-box;
+        }
+
+        .search-container button {
+            background-color: #cf102d; 
+            color: white;
+            padding: 10px;
+            border: 2px solid #cf102d; 
+            border-left: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 16px;
+            width: 80px; 
+            box-sizing: border-box;
+        }
+
+        .search-container button:hover {
+            background-color: #a50920; 
+        }
+
+        .autocomplete-dropdown {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background-color: white;
+            width: 100%; 
+            z-index: 1000;
+            top: 100%; 
+            left: 0; 
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: -1px; 
+        }
+
+        .autocomplete-dropdown div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-dropdown div:hover {
+            background-color: #f0f0f0;
+        }
+
+        #course-data {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #cf102d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/">
+            <img src="static/st-johns-university.png" alt="St. John's University Logo" style="width: 150px; margin-bottom: 20px;">
+        </a>
+        <h1>Course Information</h1>
+
+        <div class="buttons">
+            <a href="/insert_course"><button>Insert</button></a>
+            <button onclick="openUpdateForm()">Update</button>
+            <button onclick="openDeleteForm()">Delete</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="search-input" oninput="searchCourses()" placeholder="Search for a Course...">
+            <button onclick="resetSearch()">Reset</button>
+            <div id="autocomplete-list" class="autocomplete-dropdown"></div>
+        </div>
+
+        <div id="course-data">
+            <table id="course-data-table"></table>
+        </div>
+    </div>
+</body>
+</html>
