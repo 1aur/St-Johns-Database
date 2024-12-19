@@ -14,7 +14,7 @@ db_config = {
     'user': os.getenv('DB_USER'),      
     'password': os.getenv('DB_PASSWORD'),  
     'database': os.getenv('DB_DATABASE'),
-    'port': int(os.getenv('DB_PORT', 36109))  # Ensure this is cast to an integer
+    'port': int(os.getenv('DB_PORT', 36109))  
 }
 
 
