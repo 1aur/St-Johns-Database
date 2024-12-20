@@ -112,8 +112,10 @@ def search_students():
         SELECT stormcard_id, first_name, last_name
         FROM student
         WHERE LOWER(first_name) LIKE %s
+        OR LOWER(last_name) LIKE %s
     """
-    cursor.execute(query, (f"{search_query}%",))  
+    search_pattern = f"%{search_query}%"
+    cursor.execute(query, (search_pattern, search_pattern))  
     results = cursor.fetchall()
 
     return {'students': [
