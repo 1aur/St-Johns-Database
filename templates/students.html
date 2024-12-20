@@ -21,6 +21,24 @@
                     const dropdown = document.getElementById('autocomplete-list');
                     dropdown.innerHTML = ''; 
 
+                    if (data.error) {
+                        console.error('Search error:', data.error);
+                        const errorDiv = document.createElement('div');
+                        errorDiv.innerText = 'Error searching students';
+                        errorDiv.style.color = 'red';
+                        dropdown.appendChild(errorDiv);
+                        return;
+                    }
+
+                    if (data.students.length === 0) {
+                        const noResults = document.createElement('div');
+                        noResults.innerText = 'No students found';
+                        noResults.style.color = 'red';
+                        noResults.style.padding = '10px';
+                        dropdown.appendChild(noResults);
+                        return;
+                    }
+
                     data.students.forEach(student => {
                         const option = document.createElement('div');
                         option.innerText = `${student.first_name} ${student.last_name}`;
@@ -32,6 +50,11 @@
                         };
                         dropdown.appendChild(option);
                     });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const dropdown = document.getElementById('autocomplete-list');
+                    dropdown.innerHTML = '<div style="color: red; padding: 10px;">Error searching students</div>';
                 });
         }
 
@@ -40,6 +63,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
+                        console.error('Error:', data.error);
                         alert(data.error);
                         return;
                     }
@@ -48,41 +72,45 @@
                     table.innerHTML = `
                         <tr>
                             <th>Stormcard ID</th>
-                            <td>${data.stormcard_id}</td>
+                            <td>${data.stormcard_id || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>First Name</th>
-                            <td>${data.first_name}</td>
+                            <td>${data.first_name || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Last Name</th>
-                            <td>${data.last_name}</td>
+                            <td>${data.last_name || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Date of Birth</th>
-                            <td>${data.date_of_birth}</td>
+                            <td>${data.date_of_birth || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Email</th>
-                            <td>${data.email}</td>
+                            <td>${data.email || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Major</th>
-                            <td>${data.major}</td>
+                            <td>${data.major || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>GPA</th>
-                            <td>${data.gpa}</td>
+                            <td>${data.gpa || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Phone Number</th>
-                            <td>${data.phone_number}</td>
+                            <td>${data.phone_number || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Address</th>
-                            <td>${data.address}</td>
+                            <td>${data.address || 'N/A'}</td>
                         </tr>
                     `;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error fetching student data. Please try again.');
                 });
         }
 
