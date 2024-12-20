@@ -22,8 +22,9 @@ db_config = {
 @app.before_request
 def before_request():
     try:
-        g.db = mysql.connector.connect(**db_config)
-        g.cursor = g.db.cursor()
+        if not hasattr(g, 'db'):
+            g.db = mysql.connector.connect(**db_config)
+            g.cursor = g.db.cursor()
     except mysql.connector.Error as e:
         print(f"Database connection error: {e}")
         raise
@@ -33,10 +34,7 @@ def teardown_request(exception):
     if hasattr(g, 'cursor'):
         g.cursor.close()
     if hasattr(g, 'db'):
-        g.db.close() 
-        
-db = mysql.connector.connect(**db_config)
-cursor = db.cursor()
+        g.db.close()
 
 def execute_query(query, params=None, fetch_one=False, fetch_all=False):
     try:
@@ -95,8 +93,8 @@ def enrollments():
 def test_db():
     try:
         query = "SHOW TABLES"  
-        cursor.execute(query)
-        tables = cursor.fetchall()
+        g.cursor.execute(query)
+        tables = g.cursor.fetchall()
         return f"Connected to the database! Tables: {tables}"
     except Exception as e:
         return f"Error: {e}"
@@ -116,8 +114,8 @@ def search_students():
     """
     try:
         search_pattern = f"{search_query}%"
-        cursor.execute(query, (search_pattern,))  
-        results = cursor.fetchall()
+        g.cursor.execute(query, (search_pattern,))  
+        results = g.cursor.fetchall()
         print(f"Search results: {results}")  # Debug log
 
         students = [
@@ -140,8 +138,8 @@ def get_student_data():
         FROM student
         WHERE stormcard_id = %s
     """
-    cursor.execute(query, (stormcard_id,))
-    result = cursor.fetchone()
+    g.cursor.execute(query, (stormcard_id,))
+    result = g.cursor.fetchone()
     print(f"Student data result: {result}")  # Debug log
 
     if result:
@@ -186,8 +184,8 @@ def insert_student():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         try:
-            cursor.execute(query, (stormcard_id, first_name, last_name, date_of_birth, email, major, gpa, phone_number, address))
-            db.commit()
+            g.cursor.execute(query, (stormcard_id, first_name, last_name, date_of_birth, email, major, gpa, phone_number, address))
+            g.db.commit()
             return redirect('/students')  
         except Exception as e:
             return f"An error occurred: {e}"
@@ -219,8 +217,8 @@ def update_student():
             WHERE stormcard_id = %s
         """
         try:
-            cursor.execute(query, (first_name, last_name, date_of_birth, email, major, gpa, phone_number, address, stormcard_id))
-            db.commit()
+            g.cursor.execute(query, (first_name, last_name, date_of_birth, email, major, gpa, phone_number, address, stormcard_id))
+            g.db.commit()
             return redirect('/students')  
         except Exception as e:
             return f"An error occurred: {e}"
@@ -228,8 +226,8 @@ def update_student():
     # Fetch the student details to pre-fill the form
     stormcard_id = request.args.get('stormcard_id') 
     query = "SELECT * FROM student WHERE stormcard_id = %s"
-    cursor.execute(query, (stormcard_id,))
-    student = cursor.fetchone()
+    g.cursor.execute(query, (stormcard_id,))
+    student = g.cursor.fetchone()
 
     if student:
         return render_template('update_student.html', student=student)
@@ -247,9 +245,9 @@ def delete_student():
 
     query = "DELETE FROM student WHERE stormcard_id = %s"
     try:
-        cursor.execute(query, (stormcard_id,))
-        db.commit()
-        if cursor.rowcount > 0:
+        g.cursor.execute(query, (stormcard_id,))
+        g.db.commit()
+        if g.cursor.rowcount > 0:
             return redirect('/students') 
         else:
             return "Error: Student not found", 404
@@ -264,7 +262,7 @@ def search_instructors():
     search_query = request.args.get('query', '').lower()  
     print(f"Search query received: {search_query}")  # Debug log
     if not search_query:  
-        return {'instructors': []}
+        return jsonify({'instructors': []})
 
     query = """
         SELECT instructor_id, first_name, last_name
@@ -272,8 +270,8 @@ def search_instructors():
         WHERE LOWER(first_name) LIKE %s
     """
     try:
-        cursor.execute(query, (f"{search_query}%",))  
-        results = cursor.fetchall()
+        g.cursor.execute(query, (f"{search_query}%",))  
+        results = g.cursor.fetchall()
         print(f"Query results: {results}")  # Debug log
         
         instructors = [
@@ -281,10 +279,10 @@ def search_instructors():
             for row in results
         ]
         print(f"Formatted results: {instructors}")  # Debug log
-        return {'instructors': instructors}
+        return jsonify({'instructors': instructors})
     except Exception as e:
         print(f"Error in search_instructors: {e}")  # Debug log
-        return {'instructors': [], 'error': str(e)}
+        return jsonify({'instructors': [], 'error': str(e)})
 
 # Fetch instructor data
 @app.route('/get_instructor_data', methods=['GET'])
@@ -298,8 +296,8 @@ def get_instructor_data():
         WHERE instructor_id = %s
     """
     try:
-        cursor.execute(query, (instructor_id,))
-        result = cursor.fetchone()
+        g.cursor.execute(query, (instructor_id,))
+        result = g.cursor.fetchone()
         print(f"Query result: {result}")  # Debug log
 
         if result:
@@ -346,11 +344,11 @@ def insert_instructor():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         try:
-            cursor.execute(query, (instructor_id, first_name, last_name, date_of_birth, email, hire_date, tenure, salary, course_id))
-            db.commit()
+            g.cursor.execute(query, (instructor_id, first_name, last_name, date_of_birth, email, hire_date, tenure, salary, course_id))
+            g.db.commit()
             return redirect('/instructors')
         except Exception as e:
-            db.rollback() 
+            g.db.rollback() 
             return f"An error occurred: {e}"
 
     return render_template('insert_instructor.html')
@@ -376,16 +374,16 @@ def update_instructor():
             WHERE instructor_id = %s
         """
         try:
-            cursor.execute(query, (first_name, last_name, date_of_birth, email, hire_date, tenure, salary, course_id, instructor_id))
-            db.commit()
+            g.cursor.execute(query, (first_name, last_name, date_of_birth, email, hire_date, tenure, salary, course_id, instructor_id))
+            g.db.commit()
             return redirect('/instructors') 
         except Exception as e:
             return f"An error occurred: {e}"
 
     instructor_id = request.args.get('instructor_id')
     query = "SELECT * FROM instructors WHERE instructor_id = %s"
-    cursor.execute(query, (instructor_id,))
-    instructor = cursor.fetchone()
+    g.cursor.execute(query, (instructor_id,))
+    instructor = g.cursor.fetchone()
 
     if instructor:
         return render_template('update_instructor.html', instructor=instructor)
@@ -402,9 +400,9 @@ def delete_instructor():
 
     query = "DELETE FROM instructors WHERE instructor_id = %s"
     try:
-        cursor.execute(query, (instructor_id,))
-        db.commit()
-        if cursor.rowcount > 0:
+        g.cursor.execute(query, (instructor_id,))
+        g.db.commit()
+        if g.cursor.rowcount > 0:
             return redirect('/instructors')
         else:
             return "Error: Instructor not found", 404
@@ -553,21 +551,26 @@ def delete_course():
 def search_sections():
     search_query = request.args.get('query', '').lower()  
     if not search_query: 
-        return {'sections': []}
+        return jsonify({'sections': []})
 
     query = """
         SELECT section_id, year, room_location, instructor_id, course_id, semester
         FROM section
         WHERE LOWER(section_id) LIKE %s OR LOWER(year) LIKE %s OR LOWER(room_location) LIKE %s
     """
-    search_like = f"%{search_query}%"
-    cursor.execute(query, (search_like, search_like, search_like))  
-    results = cursor.fetchall()
+    try:
+        search_like = f"%{search_query}%"
+        g.cursor.execute(query, (search_like, search_like, search_like))  
+        results = g.cursor.fetchall()
 
-    return {'sections': [
-        {'section_id': row[0], 'year': row[1], 'room_location': row[2], 'instructor_id': row[3], 'course_id': row[4], 'semester': row[5]}
-        for row in results
-    ]}
+        sections = [
+            {'section_id': row[0], 'year': row[1], 'room_location': row[2], 'instructor_id': row[3], 'course_id': row[4], 'semester': row[5]}
+            for row in results
+        ]
+        return jsonify({'sections': sections})
+    except Exception as e:
+        print(f"Error in search_sections: {e}")  # Debug log
+        return jsonify({'sections': [], 'error': str(e)})
 
 # Get Section Data
 @app.route('/get_section_data', methods=['GET'])
@@ -578,8 +581,8 @@ def get_section_data():
         FROM section
         WHERE section_id = %s
     """
-    cursor.execute(query, (section_id,))
-    result = cursor.fetchone()
+    g.cursor.execute(query, (section_id,))
+    result = g.cursor.fetchone()
 
     if result:
         return jsonify({
@@ -610,16 +613,16 @@ def update_section():
             WHERE section_id = %s
         """
         try:
-            cursor.execute(query, (year, room_location, instructor_id, course_id, semester, section_id))
-            db.commit()
+            g.cursor.execute(query, (year, room_location, instructor_id, course_id, semester, section_id))
+            g.db.commit()
             return redirect('/sections') 
         except Exception as e:
             return f"An error occurred: {e}"
 
     section_id = request.args.get('section_id')  
     query = "SELECT * FROM section WHERE section_id = %s"
-    cursor.execute(query, (section_id,))
-    section = cursor.fetchone()
+    g.cursor.execute(query, (section_id,))
+    section = g.cursor.fetchone()
 
     if section:
         return render_template('update_section.html', section=section)
@@ -642,8 +645,8 @@ def insert_section():
             VALUES (%s, %s, %s, %s, %s, %s)
         """
         try:
-            cursor.execute(query, (section_id, year, room_location, instructor_id, course_id, semester))
-            db.commit()
+            g.cursor.execute(query, (section_id, year, room_location, instructor_id, course_id, semester))
+            g.db.commit()
             return redirect('/sections')  
         except Exception as e:
             return f"An error occurred: {e}"
@@ -671,20 +674,25 @@ def delete_section():
 def search_enrollments():
     search_query = request.args.get('query', '').lower()  
     if not search_query:  
-        return {'enrollments': []}
+        return jsonify({'enrollments': []})
 
     query = """
         SELECT section_id, enrollment_date, grade, enrollment_status, stormcard_id
         FROM enrollments
         WHERE LOWER(stormcard_id) LIKE %s
     """
-    cursor.execute(query, (f"{search_query}%",))  
-    results = cursor.fetchall()
+    try:
+        g.cursor.execute(query, (f"{search_query}%",))  
+        results = g.cursor.fetchall()
 
-    return {'enrollments': [
-        {'section_id': row[0], 'enrollment_date': row[1], 'grade': row[2], 'enrollment_status': row[3], 'stormcard_id': row[4]}
-        for row in results
-    ]}
+        enrollments = [
+            {'section_id': row[0], 'enrollment_date': row[1], 'grade': row[2], 'enrollment_status': row[3], 'stormcard_id': row[4]}
+            for row in results
+        ]
+        return jsonify({'enrollments': enrollments})
+    except Exception as e:
+        print(f"Error in search_enrollments: {e}")  # Debug log
+        return jsonify({'enrollments': [], 'error': str(e)})
 
 @app.route('/get_enrollment_data', methods=['GET'])
 def get_enrollment_data():
@@ -694,8 +702,8 @@ def get_enrollment_data():
         FROM enrollments
         WHERE stormcard_id = %s
     """
-    cursor.execute(query, (stormcard_id,))
-    result = cursor.fetchone()
+    g.cursor.execute(query, (stormcard_id,))
+    result = g.cursor.fetchone()
 
     if result:
         return {
@@ -723,8 +731,8 @@ def insert_enrollment():
             VALUES (%s, %s, %s, %s, %s)
         """
         try:
-            cursor.execute(query, (section_id, enrollment_date, grade, enrollment_status, stormcard_id))
-            db.commit()
+            g.cursor.execute(query, (section_id, enrollment_date, grade, enrollment_status, stormcard_id))
+            g.db.commit()
             return redirect('/enrollments')  
         except Exception as e:
             return f"An error occurred: {e}"
@@ -740,8 +748,8 @@ def update_enrollment():
         return "Stormcard ID is missing", 400  
 
     query = "SELECT * FROM enrollments WHERE stormcard_id = %s"
-    cursor.execute(query, (stormcard_id,))
-    enrollment = cursor.fetchone()
+    g.cursor.execute(query, (stormcard_id,))
+    enrollment = g.cursor.fetchone()
 
     if enrollment:
         return render_template('update_enrollments.html', enrollment=enrollment)
@@ -760,9 +768,9 @@ def delete_enrollment():
 
     query = "DELETE FROM enrollments WHERE stormcard_id = %s"
     try:
-        cursor.execute(query, (stormcard_id,))
-        db.commit()
-        if cursor.rowcount > 0:
+        g.cursor.execute(query, (stormcard_id,))
+        g.db.commit()
+        if g.cursor.rowcount > 0:
             return redirect('/enrollments')  
         else:
             return "Error: Enrollment not found", 404
