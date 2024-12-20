@@ -107,24 +107,28 @@ def search_students():
     search_query = request.args.get('query', '').lower()  
     print(f"Search query received: {search_query}")  # Debug log
     if not search_query:  
-        return {'students': []}
+        return jsonify({'students': []})
 
     query = """
         SELECT stormcard_id, first_name, last_name
         FROM student
         WHERE LOWER(first_name) LIKE %s
     """
-    search_pattern = f"{search_query}%"
-    cursor.execute(query, (search_pattern,))  
-    results = cursor.fetchall()
-    print(f"Search results: {results}")  # Debug log
+    try:
+        search_pattern = f"{search_query}%"
+        cursor.execute(query, (search_pattern,))  
+        results = cursor.fetchall()
+        print(f"Search results: {results}")  # Debug log
 
-    students = [
-        {'stormcard_id': row[0], 'first_name': row[1], 'last_name': row[2]}
-        for row in results
-    ]
-    print(f"Formatted results: {students}")  # Debug log
-    return {'students': students}
+        students = [
+            {'stormcard_id': row[0], 'first_name': row[1], 'last_name': row[2]}
+            for row in results
+        ]
+        print(f"Formatted results: {students}")  # Debug log
+        return jsonify({'students': students})
+    except Exception as e:
+        print(f"Error in search_students: {e}")  # Debug log
+        return jsonify({'students': [], 'error': str(e)})
 
 # Fetch detailed student data
 @app.route('/get_student_data', methods=['GET'])
@@ -141,21 +145,24 @@ def get_student_data():
     print(f"Student data result: {result}")  # Debug log
 
     if result:
+        # Convert date object to string format
+        date_of_birth = result[3].strftime('%Y-%m-%d') if result[3] else None
+        
         response = {
             'stormcard_id': result[0],
             'first_name': result[1],
             'last_name': result[2],
-            'date_of_birth': result[3],
+            'date_of_birth': date_of_birth,
             'email': result[4],
             'major': result[5],
-            'gpa': result[6],
+            'gpa': str(result[6]) if result[6] else None,  # Convert float to string
             'phone_number': result[7],
-            'address': result[8],
+            'address': result[8]
         }
         print(f"Formatted response: {response}")  # Debug log
-        return response
+        return jsonify(response)
     else:
-        return {'error': 'Student not found'}, 404
+        return jsonify({'error': 'Student not found'}), 404
 
 
 #Insert New Student

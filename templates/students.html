@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="static/STJohnsLogo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information</title>
+    
+    <script>
+        function searchStudents() {
+            const query = document.getElementById('search-input').value.trim();
+
+            if (!query) {
+                document.getElementById('autocomplete-list').innerHTML = '';
+                return;
+            }
+
+            fetch(`/search_students?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('autocomplete-list');
+                    dropdown.innerHTML = ''; 
+
+                    if (data.error) {
+                        console.error('Search error:', data.error);
+                        const errorDiv = document.createElement('div');
+                        errorDiv.innerText = 'Error searching students';
+                        errorDiv.style.color = 'red';
+                        dropdown.appendChild(errorDiv);
+                        return;
+                    }
+
+                    if (data.students.length === 0) {
+                        const noResults = document.createElement('div');
+                        noResults.innerText = 'No students found';
+                        noResults.style.color = 'red';
+                        noResults.style.padding = '10px';
+                        dropdown.appendChild(noResults);
+                        return;
+                    }
+
+                    data.students.forEach(student => {
+                        const option = document.createElement('div');
+                        option.innerText = `${student.first_name} ${student.last_name}`;
+                        option.className = 'dropdown-item';
+                        option.onclick = () => {
+                            document.getElementById('search-input').value = `${student.first_name} ${student.last_name}`;
+                            fetchStudentData(student.stormcard_id);
+                            dropdown.innerHTML = ''; 
+                        };
+                        dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const dropdown = document.getElementById('autocomplete-list');
+                    dropdown.innerHTML = '<div style="color: red; padding: 10px;">Error searching students</div>';
+                });
+        }
+
+        function fetchStudentData(stormcard_id) {
+            fetch(`/get_student_data?stormcard_id=${stormcard_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error:', data.error);
+                        alert(data.error);
+                        return;
+                    }
+
+                    const table = document.getElementById('student-data-table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>Stormcard ID</th>
+                            <td>${data.stormcard_id || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>First Name</th>
+                            <td>${data.first_name || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Name</th>
+                            <td>${data.last_name || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Date of Birth</th>
+                            <td>${data.date_of_birth || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>${data.email || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Major</th>
+                            <td>${data.major || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>GPA</th>
+                            <td>${data.gpa || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone Number</th>
+                            <td>${data.phone_number || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Address</th>
+                            <td>${data.address || 'N/A'}</td>
+                        </tr>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error fetching student data. Please try again.');
+                });
+        }
+
+        function resetSearch() {
+            document.getElementById('search-input').value = ''; 
+            document.getElementById('autocomplete-list').innerHTML = ''; 
+            document.getElementById('student-data-table').innerHTML = ''; 
+        }
+
+        function openDeleteForm() {
+            const stormcard_id = prompt("Enter the Stormcard ID of the student you want to delete:");
+            if (stormcard_id) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/delete_student';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'stormcard_id';
+                input.value = stormcard_id;
+
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function openUpdateForm() {
+            const stormcard_id = prompt("Enter the Stormcard ID of the student you want to update:");
+            if (stormcard_id) {
+                window.location.href = `/update_student?stormcard_id=${stormcard_id}`;
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px; 
+        }
+
+        .buttons a {
+            text-decoration: none;
+        }
+
+        .buttons button {
+            background-color: #cf102d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .buttons button:hover {
+            background-color: #c0392b;
+        }
+
+        .search-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            width: 350px; 
+        }
+
+        .search-container input {
+            padding: 10px;
+            border: 2px solid #cf102d;
+            border-right: none; 
+            border-radius: 5px 0 0 5px;
+            width: calc(100% - 80px); 
+            font-size: 16px;
+            display: inline-block;
+            box-sizing: border-box; 
+        }
+        
+        .search-container button {
+            background-color: #cf102d;
+            color: white;
+            padding: 10px;
+            border: 2px solid #cf102d; 
+            border-left: none; 
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 16px;
+            width: 80px; 
+            box-sizing: border-box; 
+        }
+        
+
+        .search-container button:hover {
+            background-color: ##cf102d;
+        }
+
+        .autocomplete-dropdown {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background-color: white;
+            width: 100%;
+            z-index: 1000;
+            top: 100%; 
+            left: 0; 
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+        }
+
+        .autocomplete-dropdown div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-dropdown div:hover {
+            background-color: #f0f0f0;
+        }
+
+        #student-data {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #cf102d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/">
+            <img src="static/st-johns-university.png" alt="St. John's University Logo" style="width: 150px; margin-bottom: 20px;">
+        </a>
+        <h1>Student Information</h1>
+    
+        <div class="buttons">
+            <a href="/insert_student"><button>Insert</button></a>
+            <button onclick="openUpdateForm()">Update</button>
+            <button onclick="openDeleteForm()">Delete</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="search-input" oninput="searchStudents()" placeholder="Search for a Student...">
+            <button onclick="resetSearch()">Reset</button>
+            <div id="autocomplete-list" class="autocomplete-dropdown"></div>
+        </div>
+
+        <div id="student-data">
+            <table id="student-data-table"></table>
+        </div>
+    </div>
+</body>
+</html>
