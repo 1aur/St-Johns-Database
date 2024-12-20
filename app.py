@@ -10,11 +10,12 @@ app = Flask(__name__)
 
 
 db_config = {
-    'host': os.getenv('DB_HOST'),
+    'host': os.getenv('DB_HOST', 'localhost'),
     'user': os.getenv('DB_USER', 'root'),
     'password': os.getenv('DB_PASSWORD'),
     'database': os.getenv('DB_DATABASE'),
-    'port': int(os.getenv('DB_PORT'))
+    'port': int(os.getenv('DB_PORT', '3306')),
+    'ssl_verify_cert': True
 }
 
 
@@ -753,4 +754,5 @@ def delete_enrollment():
         return f"An error occurred: {e}"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
