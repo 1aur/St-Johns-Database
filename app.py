@@ -10,11 +10,11 @@ app = Flask(__name__)
 
 
 db_config = {
-    'host': os.getenv('DB_HOST', 'localhost'),
+    'host': os.getenv('DB_HOST'),
     'user': os.getenv('DB_USER', 'root'),
     'password': os.getenv('DB_PASSWORD'),
     'database': os.getenv('DB_DATABASE'),
-    'port': int(os.getenv('DB_PORT', '3306'))
+    'port': int(os.getenv('DB_PORT'))
 }
 
 
@@ -245,6 +245,7 @@ def delete_student():
 @app.route('/search_instructors', methods=['GET'])
 def search_instructors():
     search_query = request.args.get('query', '').lower()  
+    print(f"Search query received: {search_query}")  # Debug log
     if not search_query:  
         return {'instructors': []}
 
@@ -253,41 +254,60 @@ def search_instructors():
         FROM instructors
         WHERE LOWER(first_name) LIKE %s
     """
-    cursor.execute(query, (f"{search_query}%",))  
-    results = cursor.fetchall()
-
-    return {'instructors': [
-        {'instructor_id': row[0], 'first_name': row[1], 'last_name': row[2]}
-        for row in results
-    ]}
+    try:
+        cursor.execute(query, (f"{search_query}%",))  
+        results = cursor.fetchall()
+        print(f"Query results: {results}")  # Debug log
+        
+        instructors = [
+            {'instructor_id': row[0], 'first_name': row[1], 'last_name': row[2]}
+            for row in results
+        ]
+        print(f"Formatted results: {instructors}")  # Debug log
+        return {'instructors': instructors}
+    except Exception as e:
+        print(f"Error in search_instructors: {e}")  # Debug log
+        return {'instructors': [], 'error': str(e)}
 
 # Fetch instructor data
 @app.route('/get_instructor_data', methods=['GET'])
 def get_instructor_data():
     instructor_id = request.args.get('instructor_id', '') 
-    print("Fetching instructor with ID:", instructor_id) 
+    print(f"Fetching instructor with ID: {instructor_id}")  # Debug log
+    
     query = """
         SELECT instructor_id, first_name, last_name, date_of_birth, email, hire_date, tenure, salary, course_id
         FROM instructors
         WHERE instructor_id = %s
     """
-    cursor.execute(query, (instructor_id,))
-    result = cursor.fetchone()
+    try:
+        cursor.execute(query, (instructor_id,))
+        result = cursor.fetchone()
+        print(f"Query result: {result}")  # Debug log
 
-    if result:
-        return {
-            'instructor_id': result[0],
-            'first_name': result[1],
-            'last_name': result[2],
-            'date_of_birth': result[3],
-            'email': result[4],
-            'hire_date': result[5],
-            'tenure': result[6],
-            'salary': result[7],
-            'course_id': result[8]
-        }
-    else:
-        return {'error': 'Instructor not found'}, 404
+        if result:
+            # Convert date objects to string format
+            date_of_birth = result[3].strftime('%Y-%m-%d') if result[3] else None
+            hire_date = result[5].strftime('%Y-%m-%d') if result[5] else None
+            
+            response = {
+                'instructor_id': result[0],
+                'first_name': result[1],
+                'last_name': result[2],
+                'date_of_birth': date_of_birth,
+                'email': result[4],
+                'hire_date': hire_date,
+                'tenure': result[6],
+                'salary': str(result[7]) if result[7] else None,  # Convert Decimal to string
+                'course_id': result[8]
+            }
+            print(f"Formatted response: {response}")  # Debug log
+            return jsonify(response)
+        else:
+            return jsonify({'error': 'Instructor not found'}), 404
+    except Exception as e:
+        print(f"Error in get_instructor_data: {e}")  # Debug log
+        return jsonify({'error': str(e)}), 500
 
 
 # Insert New Instructor

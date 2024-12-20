@@ -21,6 +21,15 @@
                     const dropdown = document.getElementById('autocomplete-list');
                     dropdown.innerHTML = ''; 
         
+                    if (data.error) {
+                        console.error('Search error:', data.error);
+                        const errorDiv = document.createElement('div');
+                        errorDiv.innerText = 'Error searching instructors';
+                        errorDiv.style.color = 'red';
+                        dropdown.appendChild(errorDiv);
+                        return;
+                    }
+        
                     if (data.instructors.length === 0) {
                         const noResults = document.createElement('div');
                         noResults.innerText = 'No instructors found';
@@ -42,8 +51,9 @@
                     });
                 })
                 .catch(error => {
-                    console.error('Error fetching instructors:', error);
-                    alert('An error occurred while fetching instructors. Please try again.');
+                    console.error('Error:', error);
+                    const dropdown = document.getElementById('autocomplete-list');
+                    dropdown.innerHTML = '<div style="color: red; padding: 10px;">Error searching instructors</div>';
                 });
         }
         
@@ -53,6 +63,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
+                        console.error('Error:', data.error);
                         alert(data.error);
                         return;
                     }
@@ -61,44 +72,45 @@
                     table.innerHTML = `
                         <tr>
                             <th>Instructor ID</th>
-                            <td>${data.instructor_id}</td>
+                            <td>${data.instructor_id || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>First Name</th>
-                            <td>${data.first_name}</td>
+                            <td>${data.first_name || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Last Name</th>
-                            <td>${data.last_name}</td>
+                            <td>${data.last_name || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Date of Birth</th>
-                            <td>${data.date_of_birth}</td>
+                            <td>${data.date_of_birth || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Email</th>
-                            <td>${data.email}</td>
+                            <td>${data.email || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Hire Date</th>
-                            <td>${data.hire_date}</td>
+                            <td>${data.hire_date || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Tenure</th>
-                            <td>${data.tenure}</td>
+                            <td>${data.tenure || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Salary</th>
-                            <td>${data.salary}</td>
+                            <td>${data.salary || 'N/A'}</td>
                         </tr>
                         <tr>
                             <th>Course ID</th>
-                            <td>${data.course_id}</td>
+                            <td>${data.course_id || 'N/A'}</td>
                         </tr>
                     `;
                 })
                 .catch(error => {
-                    console.error('Error fetching instructor data:', error);
+                    console.error('Error:', error);
+                    alert('Error fetching instructor data. Please try again.');
                 });
         }
 
