@@ -105,6 +105,7 @@ def test_db():
 @app.route('/search_students', methods=['GET'])
 def search_students():
     search_query = request.args.get('query', '').lower()  
+    print(f"Search query received: {search_query}")  # Debug log
     if not search_query:  
         return {'students': []}
 
@@ -112,21 +113,24 @@ def search_students():
         SELECT stormcard_id, first_name, last_name
         FROM student
         WHERE LOWER(first_name) LIKE %s
-        OR LOWER(last_name) LIKE %s
     """
-    search_pattern = f"%{search_query}%"
-    cursor.execute(query, (search_pattern, search_pattern))  
+    search_pattern = f"{search_query}%"
+    cursor.execute(query, (search_pattern,))  
     results = cursor.fetchall()
+    print(f"Search results: {results}")  # Debug log
 
-    return {'students': [
+    students = [
         {'stormcard_id': row[0], 'first_name': row[1], 'last_name': row[2]}
         for row in results
-    ]}
+    ]
+    print(f"Formatted results: {students}")  # Debug log
+    return {'students': students}
 
 # Fetch detailed student data
 @app.route('/get_student_data', methods=['GET'])
 def get_student_data():
     stormcard_id = request.args.get('stormcard_id', '')  
+    print(f"Fetching student data for ID: {stormcard_id}")  # Debug log
     query = """
         SELECT stormcard_id, first_name, last_name, date_of_birth, email, major, gpa, phone_number, address
         FROM student
@@ -134,9 +138,10 @@ def get_student_data():
     """
     cursor.execute(query, (stormcard_id,))
     result = cursor.fetchone()
+    print(f"Student data result: {result}")  # Debug log
 
     if result:
-        return {
+        response = {
             'stormcard_id': result[0],
             'first_name': result[1],
             'last_name': result[2],
@@ -147,6 +152,8 @@ def get_student_data():
             'phone_number': result[7],
             'address': result[8],
         }
+        print(f"Formatted response: {response}")  # Debug log
+        return response
     else:
         return {'error': 'Student not found'}, 404
 
