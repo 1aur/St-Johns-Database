@@ -263,7 +263,7 @@ def get_instructor_data():
     instructor_id = request.args.get('instructor_id', '') 
     print("Fetching instructor with ID:", instructor_id) 
     query = """
-        SELECT instructor_id, first_name, last_name, date_of_birth, email, hire_date, tenure, salary, department
+        SELECT instructor_id, first_name, last_name, date_of_birth, email, hire_date, tenure, salary, course_id
         FROM instructors
         WHERE instructor_id = %s
     """
@@ -280,7 +280,7 @@ def get_instructor_data():
             'hire_date': result[5],
             'tenure': result[6],
             'salary': result[7],
-            'department': result[8]
+            'course_id': result[8]
         }
     else:
         return {'error': 'Instructor not found'}, 404
@@ -298,14 +298,14 @@ def insert_instructor():
         hire_date = request.form.get('hire_date')
         tenure = request.form.get('tenure')
         salary = request.form.get('salary')
-        department = request.form.get('department')
+        course_id = request.form.get('course_id')
 
         query = """
-            INSERT INTO instructors (instructor_id, first_name, last_name, date_of_birth, email, hire_date, tenure, salary, department)
+            INSERT INTO instructors (instructor_id, first_name, last_name, date_of_birth, email, hire_date, tenure, salary, course_id)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         try:
-            cursor.execute(query, (instructor_id, first_name, last_name, date_of_birth, email, hire_date, tenure, salary, department))
+            cursor.execute(query, (instructor_id, first_name, last_name, date_of_birth, email, hire_date, tenure, salary, course_id))
             db.commit()
             return redirect('/instructors')
         except Exception as e:
@@ -326,16 +326,16 @@ def update_instructor():
         hire_date = request.form.get('hire_date')
         tenure = request.form.get('tenure')
         salary = request.form.get('salary')
-        department = request.form.get('department')
+        course_id = request.form.get('course_id')
 
         query = """
             UPDATE instructors
             SET first_name = %s, last_name = %s, date_of_birth = %s, email = %s,
-                hire_date = %s, tenure = %s, salary = %s, department = %s
+                hire_date = %s, tenure = %s, salary = %s, course_id = %s
             WHERE instructor_id = %s
         """
         try:
-            cursor.execute(query, (first_name, last_name, date_of_birth, email, hire_date, tenure, salary, department, instructor_id))
+            cursor.execute(query, (first_name, last_name, date_of_birth, email, hire_date, tenure, salary, course_id, instructor_id))
             db.commit()
             return redirect('/instructors') 
         except Exception as e:

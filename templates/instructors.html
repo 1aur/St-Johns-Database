@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="static/STJohnsLogo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Information</title>
+
+    <script>
+        function searchInstructors() {
+            const query = document.getElementById('search-input').value.trim();
+        
+            if (!query) {
+                document.getElementById('autocomplete-list').innerHTML = '';
+                return;
+            }
+        
+            fetch(`/search_instructors?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('autocomplete-list');
+                    dropdown.innerHTML = ''; 
+        
+                    if (data.instructors.length === 0) {
+                        const noResults = document.createElement('div');
+                        noResults.innerText = 'No instructors found';
+                        noResults.style.color = 'red';
+                        noResults.style.padding = '10px';
+                        dropdown.appendChild(noResults);
+                        return;
+                    }
+                    data.instructors.forEach(instructor => {
+                        const option = document.createElement('div');
+                        option.innerText = `${instructor.first_name} ${instructor.last_name}`;
+                        option.className = 'dropdown-item';
+                        option.onclick = () => {
+                            document.getElementById('search-input').value = `${instructor.first_name} ${instructor.last_name}`;
+                            fetchInstructorData(instructor.instructor_id);
+                            dropdown.innerHTML = ''; 
+                        };
+                        dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching instructors:', error);
+                    alert('An error occurred while fetching instructors. Please try again.');
+                });
+        }
+        
+
+        function fetchInstructorData(instructor_id) {
+            fetch(`/get_instructor_data?instructor_id=${instructor_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    const table = document.getElementById('instructor-data-table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>Instructor ID</th>
+                            <td>${data.instructor_id}</td>
+                        </tr>
+                        <tr>
+                            <th>First Name</th>
+                            <td>${data.first_name}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Name</th>
+                            <td>${data.last_name}</td>
+                        </tr>
+                        <tr>
+                            <th>Date of Birth</th>
+                            <td>${data.date_of_birth}</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>${data.email}</td>
+                        </tr>
+                        <tr>
+                            <th>Hire Date</th>
+                            <td>${data.hire_date}</td>
+                        </tr>
+                        <tr>
+                            <th>Tenure</th>
+                            <td>${data.tenure}</td>
+                        </tr>
+                        <tr>
+                            <th>Salary</th>
+                            <td>${data.salary}</td>
+                        </tr>
+                        <tr>
+                            <th>Course ID</th>
+                            <td>${data.course_id}</td>
+                        </tr>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error fetching instructor data:', error);
+                });
+        }
+
+        function resetSearch() {
+            document.getElementById('search-input').value = ''; 
+            document.getElementById('autocomplete-list').innerHTML = ''; 
+            document.getElementById('instructor-data-table').innerHTML = ''; 
+        }
+
+        function openDeleteForm() {
+            const instructorId = prompt("Enter the ID of the instructor you want to delete:");
+            if (instructorId) {
+                const confirmed = confirm(`Are you sure you want to delete Instructor with ID: ${instructorId}?`);
+                if (confirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/delete_instructor';
+
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'instructor_id';
+                    input.value = instructorId;
+
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+        }
+
+        function openUpdateForm() {
+            const instructorId = prompt("Enter the ID of the instructor you want to update:");
+            if (instructorId) {
+                window.location.href = `/update_instructor?instructor_id=${instructorId}`;
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px; 
+        }
+
+        .buttons a {
+            text-decoration: none;
+        }
+
+        .buttons button {
+            background-color: #cf102d; 
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .buttons button:hover {
+            background-color: #a50920; 
+        }
+
+        .search-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            width: 350px; 
+        }
+
+        .search-container input {
+            padding: 10px;
+            border: 2px solid #cf102d; 
+            border-right: none; 
+            border-radius: 5px 0 0 5px;
+            width: calc(100% - 80px); 
+            font-size: 16px;
+            display: inline-block;
+            box-sizing: border-box; 
+        }
+
+        .search-container button {
+            background-color: #cf102d; 
+            color: white;
+            padding: 10px;
+            border: 2px solid #cf102d; 
+            border-left: none; 
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 16px;
+            width: 80px; 
+            box-sizing: border-box; 
+        }
+
+        .search-container button:hover {
+            background-color: #a50920;
+        }
+
+        .autocomplete-dropdown {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background-color: white;
+            width: 100%; 
+            z-index: 1000;
+            top: 100%; 
+            left: 0; 
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: -1px; 
+        }
+        
+        .autocomplete-dropdown div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-dropdown div:hover {
+            background-color: #f0f0f0;
+        }
+
+        #instructor-data {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #cf102d; 
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/">
+            <img src="static/st-johns-university.png" alt="St. John's University Logo" style="width: 150px; margin-bottom: 20px;">
+        </a>
+        <h1>Instructor Information</h1>
+
+        <div class="buttons">
+            <a href="/insert_instructor"><button>Insert</button></a>
+            <button onclick="openUpdateForm()">Update</button>
+            <button onclick="openDeleteForm()">Delete</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="search-input" oninput="searchInstructors()" placeholder="Search for an Instructor...">
+            <button onclick="resetSearch()">Reset</button>
+            <div id="autocomplete-list" class="autocomplete-dropdown"></div>
+        </div>
+
+        <div id="instructor-data">
+            <table id="instructor-data-table"></table>
+        </div>
+    </div>
+</body>
+</html>
